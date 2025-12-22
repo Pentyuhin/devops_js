@@ -11,8 +11,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Установка зависимости
-        run: npm install
+      # - name: Установка зависимости
+      #   run: npm ci
 
       - name: Линтинг
         run: npm run lint
