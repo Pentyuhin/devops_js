@@ -15,6 +15,15 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Установка зависимости
+        run: npm ci
+
+      - name: Линтинг
+        run: npm run lint
+
+      - name: Тестирование 
+        run: npm run test 
+
       - name: Сборка
         run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
 
