@@ -13,7 +13,7 @@ jobs:
       runs-on: ubuntu-latest # Используем GitHub-hosted runner с Ubuntu
 
       steps:
-        - users: actions/checkout@v3
+        - uses: actions/checkout@v3
 
         - name: Сборка
           run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
@@ -30,7 +30,7 @@ jobs:
 
       steps:
         - name: Deploy over SSH
-          user: appleboy/ssh-action@v0.1.6
+          uses: appleboy/ssh-action@v0.1.6
           with:
             host: ${{secrets.HOST}}
             username: ${{secrets.SSH_USER}}
