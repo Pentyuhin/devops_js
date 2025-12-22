@@ -5,8 +5,8 @@ on:
     branches: [master] # Запускать только при пуше в ветку main
 
 jobs:
-  checks:
-    uses: ./.github/workflows/deploy.yml
+  # checks:
+  #   uses: ./.github/workflows/deploy.yml
 
   build:
     needs: checks
