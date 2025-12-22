@@ -6,38 +6,38 @@ on:
 
 jobs:
   checkes:
-    users: ./.github/workflows/deploy.yml
+    uses: ./.github/workflows/deploy.yml
 
-    build:
-      needs: checks
-      runs-on: ubuntu-latest # Используем GitHub-hosted runner с Ubuntu
+  build:
+    needs: checks
+    runs-on: ubuntu-latest # Используем GitHub-hosted runner с Ubuntu
 
-      steps:
-        - uses: actions/checkout@v3
+    steps:
+      - uses: actions/checkout@v3
 
-        - name: Сборка
-          run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
+      - name: Сборка
+        run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
 
-        - name: Docker Login
-          run: echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
+      - name: Docker Login
+        run: echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
 
-        - name: Docker Push
-          run: docker push ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} 
+      - name: Docker Push
+        run: docker push ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} 
 
-    deploy:
-      needs: build
-      runs-on: ubuntu-lastest
+  deploy:
+    needs: build
+    runs-on: ubuntu-lastest
 
-      steps:
-        - name: Deploy over SSH
-          uses: appleboy/ssh-action@v0.1.6
-          with:
-            host: ${{secrets.HOST}}
-            username: ${{secrets.SSH_USER}}
-            key: ${{secrets.SSH_KEY}}
-          script: | 
-              echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
-              docker pull ${{secrets.DOCKER_USER}}/devops-node-starter:${{githun.sha}}
-              docker stop devops-node-starter || true
-              docker rm devops-node-starter || true
-              docker run -d --name devops-node-starter -p 4545:4545 ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
+    steps:
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{secrets.HOST}}
+          username: ${{secrets.SSH_USER}}
+          key: ${{secrets.SSH_KEY}}
+        script: | 
+            echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
+            docker pull ${{secrets.DOCKER_USER}}/devops-node-starter:${{githun.sha}}
+            docker stop devops-node-starter || true
+            docker rm devops-node-starter || true
+            docker run -d --name devops-node-starter -p 4545:4545 ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
