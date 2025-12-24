@@ -48,6 +48,8 @@ jobs:
       - name: Установка зависимостей (backend)
         run: npm ci
         working-directory: ./backend
+        env:
+          NODE_ENV: development   # ← чтобы точно установились devDependencies
 
       - name: Линтинг (backend)
         run: npm run lint
@@ -55,7 +57,7 @@ jobs:
 
       - name: Тестирование (backend)
         run: npm run test
-        working-directory: ./backend
+        working-directory: ./frontend
 
       - name: Сборка
         run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
