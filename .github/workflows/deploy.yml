@@ -51,11 +51,13 @@ jobs:
         env:
           NODE_ENV: development   # ← чтобы точно установились devDependencies
 
-      - name: Линтинг (backend)
+      - name: Линтинг (frontend)
         run: npm run lint
         working-directory: ./frontend
+        env:
+          NODE_ENV: development
 
-      - name: Тестирование (backend)
+      - name: Тестирование (frontend)
         run: npm run test
         working-directory: ./frontend
 
