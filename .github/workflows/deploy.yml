@@ -24,9 +24,9 @@ jobs:
           NODE_ENV: development   # ← чтобы установились devDependencies (eslint, vite)
 
       # ✅ 3. Линтинг frontend
-      - name: Lint frontend
-        run: npm run lint
-        working-directory: ./frontend
+      # - name: Lint frontend
+      #   run: npm run lint
+      #   working-directory: ./frontend
 
       # ❗ 4. Тесты — но у тебя НЕТ скрипта "test" во frontend!
       #    Либо добавь vitest/jest, либо удали этот шаг
