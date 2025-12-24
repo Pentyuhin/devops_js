@@ -43,13 +43,18 @@ jobs:
       - name: Build Docker image
         run: docker build -t ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }} backend
 
-      # ... остальное без изменений (login, push, deploy)
+      # ✅ 7 login, push, deploy
       - name: Docker Login
         run: echo ${{ secrets.DOCKER_PASS }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
 
       - name: Docker Push
         run: docker push ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }}
 
+  deploy:
+    needs: build      
+    runs-on: ubuntu-latest
+
+    steps:
       - name: Deploy over SSH
         uses: appleboy/ssh-action@v0.1.6
         with:
@@ -63,7 +68,10 @@ jobs:
             docker rm devops-node-starter || true
             docker run -d --name devops-node-starter -p 4545:4545 ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }}
 
-# name: CI/CD Pipeline
+
+
+
+            # name: CI/CD Pipeline
  
 # on:
 #   push:
