@@ -41,7 +41,7 @@ jobs:
 
       # ✅ 6. Сборка Docker-образа
       - name: Build Docker image
-        run: docker build -t ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }} .
+        run: docker build -t ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }} -f backend/Dockerfile .
 
       # ... остальное без изменений (login, push, deploy)
       - name: Docker Login
