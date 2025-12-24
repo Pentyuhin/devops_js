@@ -44,15 +44,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      - name: Установка зависимости
+      # ✅ Переходим в backend и работаем там
+      - name: Установка зависимостей (backend)
         run: npm ci
+        working-directory: ./backend
 
-      - name: Линтинг
+      - name: Линтинг (backend)
         run: npm run lint
+        working-directory: ./backend
 
-      - name: Тестирование 
-        run: npm run test 
-
+      - name: Тестирование (backend)
+        run: npm run test
+        working-directory: ./backend
+        
       - name: Сборка
         run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
 
