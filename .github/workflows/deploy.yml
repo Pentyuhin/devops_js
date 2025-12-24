@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: CI/CD Pipeline new
 
 on:
   push:
@@ -32,7 +32,7 @@ jobs:
       #    Либо добавь vitest/jest, либо удали этот шаг
       # - name: Test frontend
       #   run: npm run test
-      #   working-directory: ./frontend
+      # #   working-directory: ./frontend
 
       # ✅ 5. Сборка frontend (если нужно — зависит от Dockerfile)
       - name: Build frontend
