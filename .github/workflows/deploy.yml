@@ -1,3 +1,68 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # ✅ 1. Установка backend-зависимостей (для сборки/запуска сервера)
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: ./backend
+
+      # ✅ 2. Установка frontend-зависимостей (ОБЯЗАТЕЛЬНО!)
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: ./frontend
+        env:
+          NODE_ENV: development   # ← чтобы установились devDependencies (eslint, vite)
+
+      # ✅ 3. Линтинг frontend
+      - name: Lint frontend
+        run: npm run lint
+        working-directory: ./frontend
+
+      # ❗ 4. Тесты — но у тебя НЕТ скрипта "test" во frontend!
+      #    Либо добавь vitest/jest, либо удали этот шаг
+      # - name: Test frontend
+      #   run: npm run test
+      #   working-directory: ./frontend
+
+      # ✅ 5. Сборка frontend (если нужно — зависит от Dockerfile)
+      - name: Build frontend
+        run: npm run build
+        working-directory: ./frontend
+
+      # ✅ 6. Сборка Docker-образа
+      - name: Build Docker image
+        run: docker build -t ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }} .
+
+      # ... остальное без изменений (login, push, deploy)
+      - name: Docker Login
+        run: echo ${{ secrets.DOCKER_PASS }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
+
+      - name: Docker Push
+        run: docker push ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }}
+
+      - name: Deploy over SSH
+        uses: appleboy/ssh-action@v0.1.6
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            echo ${{ secrets.DOCKER_PASS }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
+            docker pull ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }}
+            docker stop devops-node-starter || true
+            docker rm devops-node-starter || true
+            docker run -d --name devops-node-starter -p 4545:4545 ${{ secrets.DOCKER_USER }}/devops-node-starter:${{ github.sha }}
+
 # name: CI/CD Pipeline
  
 # on:
@@ -31,54 +96,54 @@
 
 
 
-name: CI/CD Pipeline
+# name: CI/CD Pipeline
 
-on:
-  push:
-    branches: [master] # Запускать только при пуше в ветку main
+# on:
+#   push:
+#     branches: [master] # Запускать только при пуше в ветку main
 
-jobs:
-  build:
-    runs-on: ubuntu-latest # Используем GitHub-hosted runner с Ubuntu
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest # Используем GitHub-hosted runner с Ubuntu
 
-    steps:
-      - uses: actions/checkout@v3
+#     steps:
+#       - uses: actions/checkout@v3
 
-      # ✅ Переходим в backend и работаем там
-      - name: Установка зависимостей (backend)
-        run: npm ci
-        working-directory: ./backend
-        env:
-          NODE_ENV: development   # ← чтобы точно установились devDependencies
+#       # ✅ Переходим в backend и работаем там
+#       - name: Установка зависимостей (backend)
+#         run: npm ci
+#         working-directory: ./backend
+#         env:
+#           NODE_ENV: development   # ← чтобы точно установились devDependencies
 
-      - name: Линтинг (frontend)
-        run: npm run lint
-        working-directory: ./frontend
-        env:
-          NODE_ENV: development
+#       - name: Линтинг (frontend)
+#         run: npm run lint
+#         working-directory: ./frontend
+#         env:
+#           NODE_ENV: development
 
-      - name: Тестирование (frontend)
-        run: npm run test
-        working-directory: ./frontend
+#       - name: Тестирование (frontend)
+#         run: npm run test
+#         working-directory: ./frontend
 
-      - name: Сборка
-        run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
+#       - name: Сборка
+#         run: docker build -t ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} .
 
-      - name: Docker Login
-        run: echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
+#       - name: Docker Login
+#         run: echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
 
-      - name: Docker Push
-        run: docker push ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} 
+#       - name: Docker Push
+#         run: docker push ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}} 
 
-      - name: Deploy over SSH
-        uses: appleboy/ssh-action@v0.1.6
-        with:
-          host: ${{secrets.HOST}}
-          username: ${{secrets.SSH_USER}}
-          key: ${{secrets.SSH_KEY}}
-          script: | 
-              echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
-              docker pull ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
-              docker stop devops-node-starter || true
-              docker rm devops-node-starter || true
-              docker run -d --name devops-node-starter -p 4545:4545 ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
+#       - name: Deploy over SSH
+#         uses: appleboy/ssh-action@v0.1.6
+#         with:
+#           host: ${{secrets.HOST}}
+#           username: ${{secrets.SSH_USER}}
+#           key: ${{secrets.SSH_KEY}}
+#           script: | 
+#               echo ${{secrets.DOCKER_PASS}} | docker login -u ${{secrets.DOCKER_USER}} --password-stdin
+#               docker pull ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
+#               docker stop devops-node-starter || true
+#               docker rm devops-node-starter || true
+#               docker run -d --name devops-node-starter -p 4545:4545 ${{secrets.DOCKER_USER}}/devops-node-starter:${{github.sha}}
