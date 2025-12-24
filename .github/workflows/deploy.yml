@@ -22,7 +22,7 @@ jobs:
         uses: appleboy/ssh-action@v0.1.6
         with:
           host: ${{ secrets.HOST }}
-          username: ${{ secrets.USER }}
+          username: ${{ secrets.DOCKER_USER }}
           key: ${{ secrets.SSH_KEY }}
           script: |
             docker pull username/app
