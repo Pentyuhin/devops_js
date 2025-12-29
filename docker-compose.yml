@@ -1,0 +1,45 @@
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+    volumes:
+      -pgdata:/var/lib/postgres/data
+    healthcheck:
+      test: ["CMD", "pg_inready", "-U", "${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  
+  backend:
+    image: ${BACKEND_IMAGE}
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_PASSWORD}
+    ports:
+      - "8090:3001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+  
+  frontend:
+    image: ${FRONTEND_IMAG}
+    ports:
+      -"8080:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+
+volumes:
+  pgdata:

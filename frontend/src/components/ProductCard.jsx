@@ -2,13 +2,7 @@ import { Star, Package, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const ProductCard = ({ product }) => {
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('ru-RU', {
-      style: 'currency',
-      currency: 'RUB',
-      minimumFractionDigits: 0
-    }).format(price);
-  };
+  // formatPrice удалён, так как не используется
 
   return (
     <Link to={`/product/${product.id}`} className="product-card">
